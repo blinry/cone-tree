@@ -43,7 +43,7 @@ const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
-function addCone(parent, remainingDepth = 7) {
+function addCone(parent, remainingDepth) {
     if (remainingDepth === 0) {
         return
     }
@@ -51,14 +51,16 @@ function addCone(parent, remainingDepth = 7) {
     const height = (1 + Math.random()) * (remainingDepth)
     const radius = (1 + Math.random()) * remainingDepth / 3
     const geometry = new THREE.ConeGeometry(radius, height, 32)
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: new THREE.Color('blue'), emissiveIntensity: 0.5 })
+    const greenAmount = 1 - remainingDepth / maxDepth
+    const material = new THREE.MeshStandardMaterial({ color: 0x69471b, emissive: new THREE.Color(0, greenAmount, 0), emissiveIntensity: 0.5 })
     const cone = new THREE.Mesh(geometry, material)
 
-    console.log(parent?.geometry?.parameters?.height)
     cone.position.y = (parent?.geometry?.parameters?.height || 0) / 2
 
-    cone.rotateX(Math.PI * (Math.random() - 0.5))
-    cone.rotateZ(Math.PI * (Math.random() - 0.5))
+    if (parent !== scene) {
+        cone.rotateX(Math.PI * (Math.random() - 0.5))
+        cone.rotateZ(Math.PI * (Math.random() - 0.5))
+    }
 
     parent.add(cone)
 
@@ -66,16 +68,17 @@ function addCone(parent, remainingDepth = 7) {
     setTimeout(() => { addCone(cone, remainingDepth - 1) }, 650)
 }
 
-addCone(scene)
+let maxDepth = 5
+addCone(scene, maxDepth)
 
-camera.position.y = 4
-camera.position.x = -3
-camera.position.z = 2
+camera.position.y = 0
+camera.position.x = 0
+camera.position.z = 5
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.target = new THREE.Vector3(0, 0, 0)
 controls.update()
 
-const light = new THREE.DirectionalLight(0xfffff, 0.5)
+const light = new THREE.DirectionalLight(0xffffff, 0.5)
 light.position.x = 4
 scene.add(light);
 
