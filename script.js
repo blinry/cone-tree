@@ -35,7 +35,7 @@ function loadModel(name) {
 
 
 const scene = new THREE.Scene()
-scene.background = new THREE.Color('gray')
+scene.background = new THREE.Color(0xa3c3f7)
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 
@@ -45,6 +45,7 @@ document.body.appendChild(renderer.domElement)
 
 function addCone(parent, remainingDepth) {
     if (remainingDepth === 0) {
+        parent.decay()
         return
     }
 
@@ -62,6 +63,21 @@ function addCone(parent, remainingDepth) {
         cone.rotateZ(Math.PI * (Math.random() - 0.5))
     }
 
+    cone.decay = function() {
+        if (!cone.decayed) {
+            cone.material.emissive = new THREE.Color(0, 0, 0)
+            cone.material.emissiveIntensity = 0
+            const color = [0xffff00, 0xff0000, 0xff8000].sample()
+            cone.material.color = new THREE.Color(color)
+            setTimeout(() => { cone.parent.decay?.call() }, 500 + 500 * Math.random())
+            cone.decayed = true
+
+            setInterval(() => { cone.position.y -= 0.1 }, 60)
+        }
+    }
+
+    cone.decayed = parent === scene
+
     parent.add(cone)
 
     setTimeout(() => { addCone(cone, remainingDepth - 1) }, 500)
@@ -78,9 +94,20 @@ const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.target = new THREE.Vector3(0, 0, 0)
 controls.update()
 
-const light = new THREE.DirectionalLight(0xffffff, 0.5)
+const light = new THREE.DirectionalLight(0xffffff, 1)
 light.position.x = 4
+light.castShadow = true
 scene.add(light);
+
+const ambient = new THREE.AmbientLight(0x404040); // soft white light
+scene.add(ambient);
+
+const geometry = new THREE.ConeGeometry(100, 100, 128)
+const material = new THREE.MeshStandardMaterial({ color: 0x188c1c })
+const ground = new THREE.Mesh(geometry, material)
+scene.add(ground)
+ground.position.y = -55
+ground.rotateX(Math.PI)
 
 function clearThree(obj) {
     while (obj.children.length > 0) {
