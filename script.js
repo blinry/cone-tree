@@ -14,6 +14,12 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function getRandomFloat(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.random() * (max - min + 1) + min;
+}
+
 const loader = new THREE.GLTFLoader()
 
 function loadModel(name) {
@@ -37,10 +43,25 @@ const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
-const geometry = new THREE.ConeGeometry(1, 2, 32)
-const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: new THREE.Color('blue'), emissiveIntensity: 0.5 })
-const cone = new THREE.Mesh(geometry, material);
-scene.add(cone);
+function addCone(parent, remainingDepth = 7) {
+    if (remainingDepth === 0) {
+        return
+    }
+
+    const height = Math.random() * 4
+    const geometry = new THREE.ConeGeometry(1, height, 32)
+    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: new THREE.Color('blue'), emissiveIntensity: 0.5 })
+    const cone = new THREE.Mesh(geometry, material)
+
+    console.log(parent?.geometry?.parameters?.height)
+    cone.position.y = (parent?.geometry?.parameters?.height || 0) / 2
+
+    parent.add(cone)
+
+    addCone(cone, remainingDepth - 1)
+}
+
+addCone(scene)
 
 camera.position.y = 4
 camera.position.x = -3
