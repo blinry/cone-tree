@@ -48,17 +48,22 @@ function addCone(parent, remainingDepth = 7) {
         return
     }
 
-    const height = Math.random() * 4
-    const geometry = new THREE.ConeGeometry(1, height, 32)
+    const height = (1 + Math.random()) * (remainingDepth)
+    const radius = (1 + Math.random()) * remainingDepth / 3
+    const geometry = new THREE.ConeGeometry(radius, height, 32)
     const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: new THREE.Color('blue'), emissiveIntensity: 0.5 })
     const cone = new THREE.Mesh(geometry, material)
 
     console.log(parent?.geometry?.parameters?.height)
     cone.position.y = (parent?.geometry?.parameters?.height || 0) / 2
 
+    cone.rotateX(Math.PI * (Math.random() - 0.5))
+    cone.rotateZ(Math.PI * (Math.random() - 0.5))
+
     parent.add(cone)
 
-    addCone(cone, remainingDepth - 1)
+    setTimeout(() => { addCone(cone, remainingDepth - 1) }, 500)
+    setTimeout(() => { addCone(cone, remainingDepth - 1) }, 650)
 }
 
 addCone(scene)
